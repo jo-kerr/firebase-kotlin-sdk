@@ -275,14 +275,14 @@ actual open class Query(open val js: firebase.firestore.Query) {
     }
 
     internal actual fun _where(field: String, inArray: List<Any>?, arrayContainsAny: List<Any>?) = Query(
-        (inArray?.let { js.where(field, "in", it) } ?: js).let { js2 ->
-            arrayContainsAny?.let { js2.where(field, "array-contains-any", it) } ?: js2
+        (inArray?.let { js.where(field, "in", it.toTypedArray()) } ?: js).let { js2 ->
+            arrayContainsAny?.let { js2.where(field, "array-contains-any", it.toTypedArray()) } ?: js2
         }
     )
 
     internal actual fun _where(path: FieldPath, inArray: List<Any>?, arrayContainsAny: List<Any>?) = Query(
-        (inArray?.let { js.where(path, "in", it) } ?: js).let { js2 ->
-            arrayContainsAny?.let { js2.where(path, "array-contains-any", it) } ?: js2
+        (inArray?.let { js.where(path, "in", it.toTypedArray()) } ?: js).let { js2 ->
+            arrayContainsAny?.let { js2.where(path, "array-contains-any", it.toTypedArray()) } ?: js2
         }
     )
 
@@ -342,8 +342,9 @@ actual class DocumentSnapshot(val js: firebase.firestore.DocumentSnapshot) {
 
 actual typealias FieldPath = Any
 
-actual fun FieldPath(vararg fieldNames: String): FieldPath = rethrow { firebase.firestore.FieldPath(fieldNames) }
-
+actual fun FieldPath(vararg fieldNames: String): FieldPath = rethrow {
+    js("Reflect").construct(firebase.firestore.asDynamic().FieldPath, fieldNames).unsafeCast<FieldPath>()
+}
 
 actual object FieldValue {
     actual fun delete(): Any = rethrow { firebase.firestore.FieldValue.delete() }
